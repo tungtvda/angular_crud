@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['ngRoute']);
+var app = angular.module('myApp', ['ngRoute','ui.select']);
 app.factory("services", ['$http', function($http) {
   var serviceBase = 'services/'
     var obj = {};
@@ -16,9 +16,10 @@ app.factory("services", ['$http', function($http) {
 	};
 
 	obj.updateCustomer = function (id,customer) {
-	    return $http.post(serviceBase + 'updateCustomer', {id:id, customer:customer}).then(function (status) {
-	        return status.data;
-	    });
+        console.log(customer);
+	    //return $http.post(serviceBase + 'updateCustomer', {id:id, customer:customer}).then(function (status) {
+	    //    return status.data;
+	    //});
 	};
 
 	obj.deleteCustomer = function (id) {
@@ -43,9 +44,28 @@ app.controller('editCtrl', function ($scope, $rootScope, $location, $routeParams
       var original = customer.data;
       original._id = customerID;
       $scope.customer = angular.copy(original);
+    $scope.customer.country={name: 'vietnam', country_id:1};
       $scope.customer._id = customerID;
-
-      $scope.isClean = function() {
+    $scope.countries= [
+        { "country_id": 1, "name": "vietnam" },
+        { "country_id": 2, "name": "my" },
+        { "country_id": 3, "name": "cannada" },
+    ];
+    $scope.states = [
+        {"state_id":1, "name":"Alaska", "country_id": 1},
+        {"state_id":2, "name":"California", "country_id": 1},
+        {"state_id":3, "name":"New York", "country_id": 1},
+        {"state_id":4, "name":"New Brunswick", "country_id": 2},
+        {"state_id":5, "name":"Manitoba", "country_id": 2},
+        {"state_id":6, "name":"Delhi", "country_id": 3},
+        {"state_id":7, "name":"Bombay", "country_id": 3},
+        {"state_id":8, "name":"Calcutta", "country_id": 3}
+    ];
+    $scope.getCountryStates = function(){
+        $scope.sates = ($filter('filter')($scope.states, {country_id: 1}));
+    }
+    console.log($scope)
+    $scope.isClean = function() {
         return angular.equals(original, $scope.customer);
       }
 
@@ -94,3 +114,35 @@ app.run(['$location', '$rootScope', function($location, $rootScope) {
         $rootScope.title = current.$$route.title;
     });
 }]);
+app.filter("countryFilter", function () {
+    return function (items, props) {
+        var out = [];
+
+        if (angular.isArray(items)) {
+            var keys = Object.keys(props);
+
+            items.forEach(function (item) {
+                var itemMatches = false;
+
+                for (var i = 0; i < keys.length; i++) {
+                    var prop = keys[i];
+                    var text = props[prop].toLowerCase();
+                    //if (item[prop].toString().toLowerCase().indexOf(text) !== -1) {
+                    if (item[prop].toString().toLowerCase() === text) {
+                        itemMatches = true;
+                        break;
+                    }
+                }
+
+                if (itemMatches) {
+                    out.push(item);
+                }
+            });
+        } else {
+            // Let the output be the input untouched
+            out = items;
+        }
+
+        return out;
+    };
+});

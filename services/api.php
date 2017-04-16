@@ -63,12 +63,22 @@
 			if($this->get_request_method() != "GET"){
 				$this->response('',406);
 			}
-			$query="SELECT distinct c.customerNumber, c.customerName, c.email, c.address, c.city, c.state, c.postalCode, c.country FROM angularcode_customers c order by c.customerNumber desc";
+			$query="SELECT distinct c.customerNumber, c.customerName, c.email, c.address, c.city, c.state, c.postalCode, c.country, c.country_id, c.states_id FROM angularcode_customers c order by c.customerNumber desc";
 			$r = $this->mysqli->query($query) or die($this->mysqli->error.__LINE__);
 
 			if($r->num_rows > 0){
 				$result = array();
 				while($row = $r->fetch_assoc()){
+					$item_country=array(
+						'country_id'=>1,
+						'name'=>'vietnam'
+					);
+					$row=array_merge($row,array('country'=>$item_country));
+					$item_states=array(
+						'states_id'=>1,
+						'name'=>'Ha Noi'
+					);
+					$row=array_merge($row,array('state'=>$item_states));
 					$result[] = $row;
 				}
 				$this->response($this->json($result), 200); // send user details
